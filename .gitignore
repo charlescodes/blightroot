@@ -1,6 +1,7 @@
 # Godot 4.1+ generated cache.
 .godot/
 *.translation
+**/*.gd.uid
 
 # Local editor/OS files.
 .DS_Store
