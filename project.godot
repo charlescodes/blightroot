@@ -1,0 +1,9 @@
+; Engine configuration file.
+; It is best edited using the Godot editor UI.
+
+config_version=5
+
+[application]
+
+config/name="Blightroot"
+config/features=PackedStringArray("4.4")
