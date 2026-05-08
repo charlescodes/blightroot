@@ -1,3 +1,19 @@
-[gd_scene format=3 uid="uid://62ol1vkaq7c7"]
+[gd_scene load_steps=3 format=3 uid="uid://62ol1vkaq7c7"]
 
-[node name="Main" type="Node2D"]
+[ext_resource type="Script" uid="uid://dg4bbajxhymap" path="res://src/grid/hex_grid_manager.gd" id="1_63or0"]
+[ext_resource type="Script" uid="uid://3xpq3dco07k0" path="res://src/camera/camera_rig.gd" id="2_6la6x"]
+
+[node name="Main" type="Node3D"]
+
+[node name="HexGridManager" type="Node3D" parent="."]
+script = ExtResource("1_63or0")
+
+[node name="CameraRig" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.165, 0, 3.75)
+script = ExtResource("2_6la6x")
+
+[node name="PitchPivot" type="Node3D" parent="CameraRig"]
+
+[node name="Camera3D" type="Camera3D" parent="CameraRig/PitchPivot"]
+current = true
+fov = 55.0
