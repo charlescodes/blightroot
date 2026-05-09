@@ -1,12 +1,13 @@
-[gd_scene load_steps=10 format=3 uid="uid://62ol1vkaq7c7"]
+[gd_scene load_steps=11 format=3 uid="uid://62ol1vkaq7c7"]
 
 [ext_resource type="Script" uid="uid://dg4bbajxhymap" path="res://src/grid/hex_grid_manager.gd" id="1_63or0"]
 [ext_resource type="Script" uid="uid://3xpq3dco07k0" path="res://src/camera/camera_rig.gd" id="2_6la6x"]
-[ext_resource type="Script" path="res://src/interaction/interaction_controller.gd" id="3_l45p7"]
+[ext_resource type="Script" uid="uid://b8hwmk8ewjylb" path="res://src/interaction/interaction_controller.gd" id="3_l45p7"]
 [ext_resource type="Script" uid="uid://w1550dfv7lwr" path="res://src/objects/world_object_data.gd" id="4_g8al5"]
 [ext_resource type="Script" uid="uid://dotaldayijpgi" path="res://src/objects/blockout_object_view.gd" id="5_gsyx3"]
-[ext_resource type="Script" path="res://src/ui/interaction_menu.gd" id="6_vvgt8"]
-[ext_resource type="Script" path="res://src/ui/interaction_log_panel.gd" id="7_f8j3g"]
+[ext_resource type="Script" uid="uid://bs3mf3ml2nv3c" path="res://src/ui/interaction_menu.gd" id="6_vvgt8"]
+[ext_resource type="Script" uid="uid://nffvpt370fl2" path="res://src/ui/interaction_log_panel.gd" id="7_f8j3g"]
+[ext_resource type="Script" uid="uid://cb7pmkcrcai4t" path="res://src/movement/movement_controller.gd" id="8_0kq8v"]
 
 [sub_resource type="Resource" id="Resource_player_character_data"]
 script = ExtResource("4_g8al5")
@@ -45,6 +46,9 @@ object_data = SubResource("Resource_npc_data")
 
 [node name="InteractionController" type="Node" parent="."]
 script = ExtResource("3_l45p7")
+
+[node name="MovementController" type="Node" parent="."]
+script = ExtResource("8_0kq8v")
 
 [node name="InteractionUI" type="CanvasLayer" parent="."]
 

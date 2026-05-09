@@ -10,15 +10,20 @@ const HexViewScript := preload("res://src/grid/hex_view.gd")
 @export var default_walkable: bool = true
 @export var generate_on_ready: bool = true
 
+var _hexes: Dictionary = {}
+
 func _ready() -> void:
 	if generate_on_ready:
 		build_grid()
 
 func build_grid() -> Dictionary:
 	clear_hex_views()
-	var hexes := generate_hex_data(width, length, default_terrain_id, default_walkable)
-	instantiate_hex_views(hexes, self)
-	return hexes
+	_hexes = generate_hex_data(width, length, default_terrain_id, default_walkable)
+	instantiate_hex_views(_hexes, self)
+	return _hexes
+
+func get_hexes() -> Dictionary:
+	return _hexes
 
 static func generate_hex_data(
 	map_width: int,

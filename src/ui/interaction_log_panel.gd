@@ -11,8 +11,9 @@ func _ready() -> void:
 	_configure_style()
 	_render_output()
 	var event_bus := _get_event_bus()
-	if event_bus != null:
-		event_bus.connect(&"examined_output", _on_examined_output)
+	var examined_callable := Callable(self, "_on_examined_output")
+	if event_bus != null and not event_bus.is_connected(&"examined_output", examined_callable):
+		event_bus.connect(&"examined_output", examined_callable)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("toggle_interaction_log"):
@@ -73,4 +74,8 @@ func _configure_style() -> void:
 	add_theme_stylebox_override("panel", panel_style)
 
 func _get_event_bus() -> Node:
-	return get_node_or_null("/root/EventBus")
+	var tree := Engine.get_main_loop() as SceneTree
+	if tree == null:
+		return null
+
+	return tree.root.get_node_or_null("EventBus")

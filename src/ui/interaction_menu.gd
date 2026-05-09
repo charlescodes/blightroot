@@ -14,9 +14,15 @@ func _ready() -> void:
 	_ensure_layout()
 	var event_bus := _get_event_bus()
 	if event_bus != null:
-		event_bus.connect(&"interaction_menu_requested", _on_interaction_menu_requested)
-		event_bus.connect(&"hover_target_changed", _on_hover_target_changed)
-		event_bus.connect(&"interaction_ui_cancel_requested", _on_interaction_ui_cancel_requested)
+		var menu_callable := Callable(self, "_on_interaction_menu_requested")
+		var hover_callable := Callable(self, "_on_hover_target_changed")
+		var cancel_callable := Callable(self, "_on_interaction_ui_cancel_requested")
+		if not event_bus.is_connected(&"interaction_menu_requested", menu_callable):
+			event_bus.connect(&"interaction_menu_requested", menu_callable)
+		if not event_bus.is_connected(&"hover_target_changed", hover_callable):
+			event_bus.connect(&"hover_target_changed", hover_callable)
+		if not event_bus.is_connected(&"interaction_ui_cancel_requested", cancel_callable):
+			event_bus.connect(&"interaction_ui_cancel_requested", cancel_callable)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not visible:
@@ -46,11 +52,14 @@ func _on_interaction_ui_cancel_requested() -> void:
 		_close_menu()
 
 func _on_action_pressed(action_id: StringName) -> void:
-	if _target != null:
-		var event_bus := _get_event_bus()
-		if event_bus != null:
-			event_bus.emit_signal(&"interaction_action_requested", _target, action_id)
+	var selected_target := _target
 	_close_menu()
+	if selected_target == null:
+		return
+
+	var event_bus := _get_event_bus()
+	if event_bus != null:
+		event_bus.emit_signal(&"interaction_action_requested", selected_target, action_id)
 
 func _ensure_layout() -> void:
 	_action_list = get_node_or_null("ActionList") as VBoxContainer
@@ -115,4 +124,8 @@ func _set_pointer_capture(is_captured: bool) -> void:
 		event_bus.emit_signal(&"interaction_pointer_capture_changed", is_captured)
 
 func _get_event_bus() -> Node:
-	return get_node_or_null("/root/EventBus")
+	var tree := Engine.get_main_loop() as SceneTree
+	if tree == null:
+		return null
+
+	return tree.root.get_node_or_null("EventBus")

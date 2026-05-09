@@ -2,8 +2,10 @@ class_name InteractionActionResolver
 extends RefCounted
 
 const ACTION_EXAMINE: StringName = &"examine"
+const ACTION_MOVE: StringName = &"move"
 const DOMAIN_HEX: StringName = &"hex"
 const DOMAIN_WORLD_OBJECT: StringName = &"world_object"
+const PLAYER_CHARACTER_KIND: StringName = &"player_character"
 
 static func get_actions(target: Node) -> Array[Dictionary]:
 	var actions: Array[Dictionary] = []
@@ -11,6 +13,12 @@ static func get_actions(target: Node) -> Array[Dictionary]:
 		return actions
 
 	if _get_domain(target) == DOMAIN_WORLD_OBJECT:
+		if _is_player_character(target):
+			actions.append({
+				"id": ACTION_MOVE,
+				"label": "Move",
+			})
+
 		actions.append({
 			"id": ACTION_EXAMINE,
 			"label": "Examine",
@@ -69,3 +77,7 @@ static func _get_data(target: Node) -> Resource:
 		return target.call("get_target_data") as Resource
 
 	return target.get("target_data") as Resource
+
+static func _is_player_character(target: Node) -> bool:
+	var data := _get_data(target)
+	return data != null and data.get("object_kind") == PLAYER_CHARACTER_KIND
