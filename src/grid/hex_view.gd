@@ -3,10 +3,11 @@ extends MeshInstance3D
 
 const HexDataScript := preload("res://src/grid/hex_data.gd")
 const HoverTargetScript := preload("res://src/interaction/hover_target.gd")
-const OutlineHighlighterScript := preload("res://src/interaction/outline_highlighter.gd")
+const HoverHighlighterScript := preload("res://src/interaction/hover_highlighter.gd")
 
 const HEX_SIDE_TO_SIDE_M: float = 1.0
 const HEX_RADIUS_M: float = HEX_SIDE_TO_SIDE_M / sqrt(3.0)
+const HEX_MESH_Y_ROTATION_RADIANS: float = PI / 6.0
 const DEFAULT_HEIGHT_M: float = 0.08
 
 @export var hex_data: HexDataScript:
@@ -51,6 +52,7 @@ func _configure_mesh() -> void:
 	hex_mesh.bottom_radius = HEX_RADIUS_M
 	hex_mesh.height = tile_height_m
 	hex_mesh.radial_segments = 6
+	rotation.y = HEX_MESH_Y_ROTATION_RADIANS
 
 func _configure_hover_target() -> void:
 	var target := get_node_or_null("HoverTarget") as HoverTargetScript
@@ -60,7 +62,7 @@ func _configure_hover_target() -> void:
 		add_child(target)
 
 	target.highlight_root_path = ^".."
-	target.highlighter_path = ^"OutlineHighlighter"
+	target.highlighter_path = ^"HoverHighlighter"
 	target.collision_layer = 1
 	target.collision_mask = 0
 	target.input_ray_pickable = true
@@ -79,10 +81,10 @@ func _configure_hover_target() -> void:
 	shape.radius = HEX_RADIUS_M
 	shape.height = tile_height_m
 
-	var highlighter := target.get_node_or_null("OutlineHighlighter") as OutlineHighlighterScript
+	var highlighter := target.get_node_or_null("HoverHighlighter") as HoverHighlighterScript
 	if highlighter == null:
-		highlighter = OutlineHighlighterScript.new()
-		highlighter.name = "OutlineHighlighter"
+		highlighter = HoverHighlighterScript.new()
+		highlighter.name = "HoverHighlighter"
 		target.add_child(highlighter)
 
 	highlighter.root_path = ^"../.."

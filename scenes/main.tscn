@@ -1,19 +1,51 @@
-[gd_scene load_steps=4 format=3 uid="uid://62ol1vkaq7c7"]
+[gd_scene load_steps=8 format=3 uid="uid://62ol1vkaq7c7"]
 
 [ext_resource type="Script" uid="uid://dg4bbajxhymap" path="res://src/grid/hex_grid_manager.gd" id="1_63or0"]
 [ext_resource type="Script" uid="uid://3xpq3dco07k0" path="res://src/camera/camera_rig.gd" id="2_6la6x"]
 [ext_resource type="Script" uid="uid://bdr0k4haq32o5" path="res://src/interaction/hover_controller.gd" id="3_l45p7"]
+[ext_resource type="Script" uid="uid://w1550dfv7lwr" path="res://src/objects/world_object_data.gd" id="4_g8al5"]
+[ext_resource type="Script" uid="uid://dotaldayijpgi" path="res://src/objects/blockout_object_view.gd" id="5_gsyx3"]
+
+[sub_resource type="Resource" id="Resource_player_character_data"]
+script = ExtResource("4_g8al5")
+object_id = &"pc_001"
+object_kind = &"player_character"
+q = 0
+r = 0
+s = 0
+size_m = Vector3(0.5, 1.83, 0.5)
+color = Color(0.1, 0.25, 1, 1)
+is_hoverable = true
+
+[sub_resource type="Resource" id="Resource_npc_data"]
+script = ExtResource("4_g8al5")
+object_id = &"npc_001"
+object_kind = &"non_player_character"
+q = 1
+r = 0
+s = -1
+size_m = Vector3(0.5, 1.83, 0.5)
+color = Color(0.45, 0.45, 0.45, 1)
+is_hoverable = true
 
 [node name="Main" type="Node3D"]
 
 [node name="HexGridManager" type="Node3D" parent="."]
 script = ExtResource("1_63or0")
 
+[node name="PlayerCharacter" type="Node3D" parent="."]
+script = ExtResource("5_gsyx3")
+object_data = SubResource("Resource_player_character_data")
+
+[node name="NPC" type="Node3D" parent="."]
+script = ExtResource("5_gsyx3")
+object_data = SubResource("Resource_npc_data")
+
 [node name="HoverController" type="Node" parent="."]
 script = ExtResource("3_l45p7")
 
 [node name="SunLight" type="DirectionalLight3D" parent="."]
-rotation = Vector3(-1.0472, 0.785398, 0)
+transform = Transform3D(0.707107, -0.612373, 0.353552, 0, 0.499998, 0.866027, -0.707107, -0.612373, 0.353552, 0, 0, 0)
 light_energy = 1.35
 
 [node name="CameraRig" type="Node3D" parent="."]

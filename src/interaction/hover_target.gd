@@ -1,11 +1,11 @@
 class_name HoverTarget
 extends Area3D
 
-const OutlineHighlighterScript := preload("res://src/interaction/outline_highlighter.gd")
+const HoverHighlighterScript := preload("res://src/interaction/hover_highlighter.gd")
 const GROUP_NAME: StringName = &"hover_targets"
 
 @export var highlight_root_path: NodePath = ^".."
-@export var highlighter_path: NodePath = ^"OutlineHighlighter"
+@export var highlighter_path: NodePath = ^"HoverHighlighter"
 
 var _is_hovered: bool = false
 
@@ -36,5 +36,5 @@ func _configure_pickable() -> void:
 	input_ray_pickable = true
 	monitorable = true
 
-func _get_highlighter() -> OutlineHighlighterScript:
-	return get_node_or_null(highlighter_path) as OutlineHighlighterScript
+func _get_highlighter() -> HoverHighlighterScript:
+	return get_node_or_null(highlighter_path) as HoverHighlighterScript
