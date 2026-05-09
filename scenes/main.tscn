@@ -1,10 +1,12 @@
-[gd_scene load_steps=8 format=3 uid="uid://62ol1vkaq7c7"]
+[gd_scene load_steps=10 format=3 uid="uid://62ol1vkaq7c7"]
 
 [ext_resource type="Script" uid="uid://dg4bbajxhymap" path="res://src/grid/hex_grid_manager.gd" id="1_63or0"]
 [ext_resource type="Script" uid="uid://3xpq3dco07k0" path="res://src/camera/camera_rig.gd" id="2_6la6x"]
-[ext_resource type="Script" uid="uid://bdr0k4haq32o5" path="res://src/interaction/hover_controller.gd" id="3_l45p7"]
+[ext_resource type="Script" path="res://src/interaction/interaction_controller.gd" id="3_l45p7"]
 [ext_resource type="Script" uid="uid://w1550dfv7lwr" path="res://src/objects/world_object_data.gd" id="4_g8al5"]
 [ext_resource type="Script" uid="uid://dotaldayijpgi" path="res://src/objects/blockout_object_view.gd" id="5_gsyx3"]
+[ext_resource type="Script" path="res://src/ui/interaction_menu.gd" id="6_vvgt8"]
+[ext_resource type="Script" path="res://src/ui/interaction_log_panel.gd" id="7_f8j3g"]
 
 [sub_resource type="Resource" id="Resource_player_character_data"]
 script = ExtResource("4_g8al5")
@@ -41,8 +43,16 @@ object_data = SubResource("Resource_player_character_data")
 script = ExtResource("5_gsyx3")
 object_data = SubResource("Resource_npc_data")
 
-[node name="HoverController" type="Node" parent="."]
+[node name="InteractionController" type="Node" parent="."]
 script = ExtResource("3_l45p7")
+
+[node name="InteractionUI" type="CanvasLayer" parent="."]
+
+[node name="InteractionMenu" type="PanelContainer" parent="InteractionUI"]
+script = ExtResource("6_vvgt8")
+
+[node name="InteractionLogPanel" type="PanelContainer" parent="InteractionUI"]
+script = ExtResource("7_f8j3g")
 
 [node name="SunLight" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.707107, -0.612373, 0.353552, 0, 0.499998, 0.866027, -0.707107, -0.612373, 0.353552, 0, 0, 0)

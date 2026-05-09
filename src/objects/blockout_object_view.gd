@@ -3,7 +3,7 @@ extends Node3D
 
 const WorldObjectDataScript := preload("res://src/objects/world_object_data.gd")
 const HexViewScript := preload("res://src/grid/hex_view.gd")
-const HoverTargetScript := preload("res://src/interaction/hover_target.gd")
+const InteractionTargetScript := preload("res://src/interaction/interaction_target.gd")
 const HoverHighlighterScript := preload("res://src/interaction/hover_highlighter.gd")
 
 @export var object_data: WorldObjectDataScript:
@@ -20,7 +20,7 @@ func apply_data() -> void:
 
 	position = grid_to_world(object_data)
 	_configure_body()
-	_configure_hover_target()
+	_configure_interaction_target()
 
 static func grid_to_world(data: WorldObjectDataScript) -> Vector3:
 	if data == null:
@@ -50,20 +50,24 @@ func _configure_body() -> void:
 	material.albedo_color = object_data.color
 	body.material_override = material
 
-func _configure_hover_target() -> void:
-	var target := get_node_or_null("HoverTarget") as HoverTargetScript
+func _configure_interaction_target() -> void:
+	var target := get_node_or_null("InteractionTarget") as InteractionTargetScript
 	if not object_data.is_hoverable:
 		if target != null:
 			target.queue_free()
 		return
 
 	if target == null:
-		target = HoverTargetScript.new()
-		target.name = "HoverTarget"
+		target = InteractionTargetScript.new()
+		target.name = "InteractionTarget"
 		add_child(target)
 
+	target.target_domain = &"world_object"
+	target.target_data = object_data
 	target.highlight_root_path = ^".."
 	target.highlighter_path = ^"HoverHighlighter"
+	target.can_highlight = true
+	target.interaction_enabled = true
 	target.collision_layer = 1
 	target.collision_mask = 0
 	target.input_ray_pickable = true

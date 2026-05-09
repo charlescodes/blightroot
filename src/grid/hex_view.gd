@@ -2,7 +2,7 @@ class_name HexView
 extends MeshInstance3D
 
 const HexDataScript := preload("res://src/grid/hex_data.gd")
-const HoverTargetScript := preload("res://src/interaction/hover_target.gd")
+const InteractionTargetScript := preload("res://src/interaction/interaction_target.gd")
 const HoverHighlighterScript := preload("res://src/interaction/hover_highlighter.gd")
 
 const HEX_SIDE_TO_SIDE_M: float = 1.0
@@ -19,12 +19,12 @@ const DEFAULT_HEIGHT_M: float = 0.08
 	set(value):
 		tile_height_m = maxf(value, 0.01)
 		_configure_mesh()
-		_configure_hover_target()
+		_configure_interaction_target()
 		apply_data()
 
 func _ready() -> void:
 	_configure_mesh()
-	_configure_hover_target()
+	_configure_interaction_target()
 	apply_data()
 
 static func axial_to_world(p_q: int, p_r: int, p_y: float = 0.0) -> Vector3:
@@ -37,7 +37,7 @@ func apply_data() -> void:
 		return
 
 	_configure_mesh()
-	_configure_hover_target()
+	_configure_interaction_target()
 	position = axial_to_world(hex_data.q, hex_data.r, tile_height_m * 0.5)
 	name = "Hex_%d_%d_%d" % [hex_data.q, hex_data.r, hex_data.s]
 	_apply_material()
@@ -54,15 +54,19 @@ func _configure_mesh() -> void:
 	hex_mesh.radial_segments = 6
 	rotation.y = HEX_MESH_Y_ROTATION_RADIANS
 
-func _configure_hover_target() -> void:
-	var target := get_node_or_null("HoverTarget") as HoverTargetScript
+func _configure_interaction_target() -> void:
+	var target := get_node_or_null("InteractionTarget") as InteractionTargetScript
 	if target == null:
-		target = HoverTargetScript.new()
-		target.name = "HoverTarget"
+		target = InteractionTargetScript.new()
+		target.name = "InteractionTarget"
 		add_child(target)
 
+	target.target_domain = &"hex"
+	target.target_data = hex_data
 	target.highlight_root_path = ^".."
 	target.highlighter_path = ^"HoverHighlighter"
+	target.can_highlight = true
+	target.interaction_enabled = true
 	target.collision_layer = 1
 	target.collision_mask = 0
 	target.input_ray_pickable = true
