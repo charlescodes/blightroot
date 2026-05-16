@@ -17,6 +17,10 @@ const MovementControllerScript := preload("res://src/movement/movement_controlle
 const MoveTargetResolverScript := preload("res://src/movement/move_target_resolver.gd")
 const WorldObjectDataScript := preload("res://src/objects/world_object_data.gd")
 const BlockoutObjectViewScript := preload("res://src/objects/blockout_object_view.gd")
+const WallCellResolverScript := preload("res://src/walls/wall_cell_resolver.gd")
+const WallLayoutViewScript := preload("res://src/walls/wall_layout_view.gd")
+const WallSegmentDataScript := preload("res://src/walls/wall_segment_data.gd")
+const WallVisualResolverScript := preload("res://src/walls/wall_visual_resolver.gd")
 
 var _move_requested_count: int = 0
 var _move_requested_actor: Node
@@ -100,6 +104,82 @@ func _run_smoke_checks() -> bool:
 	(path_hexes[Vector3i(1, 0, -1)] as HexDataScript).is_walkable = false
 	if not HexPathfinderScript.find_path(path_hexes, Vector3i(0, 0, 0), Vector3i(2, 0, -2)).is_empty():
 		return _fail("HexPathfinder should return no path through blocked hexes.")
+
+	var wall_segment := WallSegmentDataScript.new(
+		0,
+		1,
+		2,
+		1,
+		WallSegmentDataScript.SPAN_CORNER_TO_CORNER,
+		2.2,
+		0.18,
+		Color(0.35, 0.34, 0.32, 1.0)
+	)
+	if wall_segment.start_key() != Vector3i(0, 1, -1) or wall_segment.end_key() != Vector3i(2, 1, -3):
+		return _fail("WallSegmentData did not derive valid cube keys.")
+	if not wall_segment.is_valid_span_mode():
+		return _fail("WallSegmentData rejected a valid span mode.")
+
+	var blocked_wall_keys := WallCellResolverScript.blocked_keys_for_segment(wall_segment)
+	if blocked_wall_keys.size() != 3:
+		return _fail("WallCellResolver did not return an inclusive 3-cell wall line.")
+	if blocked_wall_keys[0] != Vector3i(0, 1, -1) or blocked_wall_keys[2] != Vector3i(2, 1, -3):
+		return _fail("WallCellResolver returned the wrong segment endpoints.")
+
+	var side_segment := WallSegmentDataScript.new(
+		0,
+		1,
+		2,
+		1,
+		WallSegmentDataScript.SPAN_SIDE_TO_SIDE,
+		2.2,
+		0.18,
+		Color(0.35, 0.34, 0.32, 1.0)
+	)
+	var corner_endpoints := WallVisualResolverScript.visual_endpoints(wall_segment)
+	var side_endpoints := WallVisualResolverScript.visual_endpoints(side_segment)
+	if corner_endpoints.size() != 2 or side_endpoints.size() != 2:
+		return _fail("WallVisualResolver did not return visual segment endpoints.")
+	if corner_endpoints[0].distance_to(side_endpoints[0]) <= 0.001:
+		return _fail("WallVisualResolver produced identical corner and side anchors.")
+
+	var wall_path_hexes: Dictionary = HexGridManagerScript.generate_hex_data(3, 1)
+	for key in WallCellResolverScript.blocked_keys_for_segment(WallSegmentDataScript.new(1, 0, 1, 0)):
+		(wall_path_hexes[key] as HexDataScript).is_walkable = false
+	if not HexPathfinderScript.find_path(wall_path_hexes, Vector3i(0, 0, 0), Vector3i(2, 0, -2)).is_empty():
+		return _fail("HexPathfinder should not path through wall-blocked cells.")
+
+	var wall_parent := Node3D.new()
+	get_root().add_child(wall_parent)
+	var wall_grid := HexGridManagerScript.new()
+	wall_grid.name = "HexGridManager"
+	wall_grid.width = 4
+	wall_grid.length = 3
+	wall_grid.generate_on_ready = false
+	wall_parent.add_child(wall_grid)
+	wall_grid.build_grid()
+
+	var wall_layout := WallLayoutViewScript.new()
+	wall_layout.wall_segments.append(wall_segment)
+	wall_parent.add_child(wall_layout)
+	var layout_blocked_keys := wall_layout.apply_layout()
+	if not layout_blocked_keys.has(Vector3i(1, 1, -2)):
+		return _fail("WallLayoutView did not apply the expected blocked middle cell.")
+	var blocked_hex_data := wall_grid.get_hexes()[Vector3i(1, 1, -2)] as HexDataScript
+	if blocked_hex_data.is_walkable or blocked_hex_data.terrain_id != &"wall":
+		return _fail("WallLayoutView did not mark wall cells unwalkable.")
+	var wall_visual_root := wall_layout.get_node_or_null("WallVisuals")
+	if wall_visual_root == null or wall_visual_root.get_child_count() != 1:
+		return _fail("WallLayoutView did not create wall visuals.")
+	var wall_mesh_instance := wall_visual_root.get_child(0) as MeshInstance3D
+	var wall_box_mesh := wall_mesh_instance.mesh as BoxMesh
+	if wall_box_mesh == null:
+		return _fail("WallLayoutView visual is not a BoxMesh.")
+	if not is_equal_approx(wall_box_mesh.size.y, wall_segment.height_m):
+		return _fail("WallLayoutView visual does not use the configured wall height.")
+	if not is_equal_approx(wall_box_mesh.size.x, wall_segment.thickness_m):
+		return _fail("WallLayoutView visual does not use the configured wall thickness.")
+	wall_parent.free()
 
 	var hex_view := HexViewScript.new()
 	hex_view.hex_data = HexDataScript.new(0, 0, 0)
@@ -396,6 +476,15 @@ func _run_smoke_checks() -> bool:
 	main_interaction_controller._ready()
 	if main.get_node_or_null("MovementController") == null:
 		return _fail("Main scene is missing MovementController.")
+	var main_wall_layout := main.get_node_or_null("WallLayout") as WallLayoutViewScript
+	if main_wall_layout == null:
+		return _fail("Main scene is missing WallLayout.")
+	if main_wall_layout.wall_segments.size() != 2:
+		return _fail("Main scene wall layout should contain two sample wall segments.")
+	if main_wall_layout.wall_segments[0].span_mode != WallSegmentDataScript.SPAN_CORNER_TO_CORNER:
+		return _fail("Main scene first wall segment should be corner-to-corner.")
+	if main_wall_layout.wall_segments[1].span_mode != WallSegmentDataScript.SPAN_SIDE_TO_SIDE:
+		return _fail("Main scene second wall segment should be side-to-side.")
 	var interaction_ui := main.get_node_or_null("InteractionUI") as CanvasLayer
 	if interaction_ui == null:
 		return _fail("Main scene is missing InteractionUI CanvasLayer.")
